@@ -1,0 +1,220 @@
+#!/bin/bash
+
+################################################################################
+#                                                                              #
+# Script to download corpora from the Linguistic Data Consortium               #
+#                                                                              #
+# Original author: Lane Schwartz                                               #
+# Additional contributors: None                                                #
+#                                                                              #
+#                                                                              #
+# Change log:                                                                  #
+#                                                                              #
+#  * Created on 2016-03-04 by Lane Schwartz                                    #
+#    Based on Python code by Jonathan May:   https://github.com/jonmay/ldcdl   #
+#                                                                              #
+#                                                                              #
+# This program is free software: you can redistribute it and/or modify         #
+#  it under the terms of the GNU General Public License as published by        #
+#  the Free Software Foundation, either version 3 of the License, or           #
+#  (at your option) any later version.                                         #
+#                                                                              #
+# This program is distributed in the hope that it will be useful,              #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+#  GNU Lesser General Public License for more details.                         #
+#                                                                              #
+# You should have received a copy of the GNU General Public License            #
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.       #
+#                                                                              #
+################################################################################
+
+
+
+
+
+################################################################################
+#                                                                              #
+#                        Bash functions and variables                          #
+#                                                                              #
+################################################################################
+
+# Define a bash function for logging messages with a timestamp
+log() {
+    TIMESTAMP=$(date +"%Y-%M-%d %H:%M:%S UTC%:::z")
+    printf "%-27s %-65s %-3s" "${TIMESTAMP}" "$1" "..."  1>&2 ;
+}
+
+# Define required URL variables
+BASE_URL="https://catalog.ldc.upenn.edu"
+LOGIN_URL="https://catalog.ldc.upenn.edu/login"
+DOWNLOADS_URL="https://catalog.ldc.upenn.edu/organization/downloads"
+
+# Define other variables
+COOKIES_FILE="cookies.txt"
+COOKIE_FLAGS="-b ${COOKIES_FILE} -c ${COOKIES_FILE}"
+DOWNLOAD_FILE="corpora.tsv"
+
+
+
+
+################################################################################
+#                                                                              #
+#                       Clean up files from prior runs                         #
+#                                                                              #
+################################################################################
+
+# If an old files exists from a previous run, delete them
+log "Removing previously downloaded files: ${COOKIES_FILE} ${DOWNLOAD_FILE}"
+
+rm -f "${COOKIES_FILE}" "${DOWNLOAD_FILE}"
+
+echo
+
+
+
+################################################################################
+#                                                                              #
+#                    Prompt user for LDC login credentials                     #
+#                                                                              #
+################################################################################
+
+log "Enter LDC login credentials"
+echo
+echo
+
+# Prompt user for login information
+read -p "Enter email address: " EMAIL
+read -s -p "Enter Password: "   PASSWORD
+echo
+echo
+
+
+################################################################################
+#                                                                              #
+#                         Get LDC authenticity token                           #
+#                                                                              #
+################################################################################
+
+log "Accessing LDC login page"
+echo
+
+# Extract authenticity token from LDC login page
+TOKEN=$(curl ${COOKIE_FLAGS} "${LOGIN_URL}" 2> /dev/null | sed 's,>,>\n,g' | grep '<input name="authenticity_token"' | tr ' ' '\n' | grep "^value=" | sed 's,^value=",,; s,"$,,')
+
+
+
+
+################################################################################
+#                                                                              #
+#                            Log in to LDC account                             #
+#                                                                              #
+################################################################################
+
+log "Logging in to your LDC account"
+
+curl ${COOKIE_FLAGS}                                    \
+    --data-urlencode "utf8=✓"                           \
+    --data-urlencode "authenticity_token=${TOKEN}"      \
+    --data-urlencode "spree_user[login]=${EMAIL}"       \
+    --data-urlencode "spree_user[password]=${PASSWORD}" \
+    --data-urlencode "spree_user[remember_me]=0"        \
+    --data-urlencode "commit=Login"                     \
+    "${LOGIN_URL}" &> /dev/null
+
+echo
+
+
+
+
+################################################################################
+#                                                                              #
+#                         Access list of LDC corpora                           #
+#                                                                              #
+################################################################################
+
+log "Accessing list of your LDC corpora"
+
+
+curl ${COOKIE_FLAGS} "${DOWNLOADS_URL}"     2> /dev/null    | \
+    grep '<td class="">LDC\|button download-counter-button' | \
+    sed "s,\s*<td class=\"\">,,"                            | \
+    sed "s,</td>\s*,,"                                      | \
+    sed "s,.*href=',,"                                      | \
+    sed "s,' title=.*,,"                                    | \
+    tr '\n' '\t'                                            | \
+    sed 's,\s\?\(LDC[0-9A-Z]\+\)\t,\n\1\t,g; s,\t$,,g'        \
+    > ${DOWNLOAD_FILE}                                        \
+    2> /dev/null
+
+# Add a trailing newline to the download file
+echo >> ${DOWNLOAD_FILE}
+
+echo
+
+
+
+################################################################################
+#                                                                              #
+#                       Provide user with status update                        #
+#                                                                              #
+################################################################################
+
+echo
+echo "A list of the LDC corpora associated with your account has been saved to ${DOWNLOAD_FILE}"
+echo
+
+if [[ "$@" == "" ]]; then
+
+    echo "To download any of these corpora, re-run this script, providing the LDC corpus IDs as command line arguments"
+    echo
+
+fi
+
+
+
+################################################################################
+#                                                                              #
+#                            Download LDC corpora                              #
+#                                                                              #
+################################################################################
+
+for LDC_CORPUS in $@ ; do
+
+    echo
+
+    CORPUS_URL=$(grep "${LDC_CORPUS}" "${DOWNLOAD_FILE}" | cut -f 2)
+
+    if   [[ "${CORPUS_URL}" =~ ^/download ]]; then
+    
+        log "Downloading ${LDC_CORPUS} from ${BASE_URL}${CORPUS_URL}"
+        echo
+        curl ${COOKIE_FLAGS} "${BASE_URL}${CORPUS_URL}" > ${LDC_CORPUS}.tgz 2> ${LDC_CORPUS}.log
+    
+    elif [[ "${CORPUS_URL}" =~ "^http" ]]; then
+    
+        log "Downloading ${LDC_CORPUS} from ${CORPUS_URL}"
+        echo
+        curl ${COOKIE_FLAGS} "${CORPUS_URL}" > ${LDC_CORPUS}.tgz 2> ${LDC_CORPUS}.log
+    
+    else
+    
+        log "Not downloading ${LDC_CORPUS}: ${CORPUS_URL}"
+        echo
+    
+    fi 
+
+done
+
+echo
+
+
+################################################################################
+#                                                                              #
+#                                  Clean up                                    #
+#                                                                              #
+################################################################################
+
+rm -f ${COOKIES_FILE}
+
+
