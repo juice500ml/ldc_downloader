@@ -191,7 +191,7 @@ for LDC_CORPUS in $@ ; do
         echo
         curl ${COOKIE_FLAGS} "${BASE_URL}${CORPUS_URL}" > ${LDC_CORPUS}.tgz 2> ${LDC_CORPUS}.log
     
-    elif [[ "${CORPUS_URL}" =~ "^http" ]]; then
+    elif [[ "${CORPUS_URL}" =~ ^http ]]; then
     
         log "Downloading ${LDC_CORPUS} from ${CORPUS_URL}"
         echo
