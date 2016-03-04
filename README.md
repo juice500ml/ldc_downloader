@@ -37,7 +37,7 @@ A list of the LDC corpora associated with your account has been saved to corpora
 
 Subsequent runs will use the credentials cached in cookies.txt, if that file exists.
 
-So, kick off a job in the background to download all of your LDC corpora:
+So, to kick off a job in the background to download all of your LDC corpora:
 
 
 ```
