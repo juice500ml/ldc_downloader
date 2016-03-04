@@ -1,6 +1,7 @@
 # LDC package downloading tool
 
 Bash script by Lane Schwartz (dowobeha@gmail.com)
+
 based on Python code (https://github.com/jonmay/ldcdl) by Jonathan May (jonmay@isi.edu)
 
 04 March 2016
@@ -18,12 +19,6 @@ based on Python code (https://github.com/jonmay/ldcdl) by Jonathan May (jonmay@i
 # Usage:
 
 ```
-$ ./ldcdl.py -h
-usage: ldcdl.sh [LDC_ID1] ... 
-
-Get corpus from LDC
-
-
 $ ./download-ldc-corpora LDC99T42
 2016-26-04 16:26:49 UTC-06  Removing previously downloaded files: cookies.txt corpora.tsv     ...
 2016-26-04 16:26:49 UTC-06  Enter LDC login credentials                                       ...
