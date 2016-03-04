@@ -20,7 +20,6 @@ based on Python code (https://github.com/jonmay/ldcdl) by Jonathan May (jonmay@i
 
 ```
 $ ./download-ldc-corpora LDC99T42
-2016-26-04 16:26:49 UTC-06  Removing previously downloaded files: cookies.txt corpora.tsv     ...
 2016-26-04 16:26:49 UTC-06  Enter LDC login credentials                                       ...
 
 Enter email address: you@somewhere.edu
@@ -35,6 +34,8 @@ A list of the LDC corpora associated with your account has been saved to corpora
 
 2016-26-04 16:26:56 UTC-06  Downloading LDC99T42 from https://catalog.ldc.upenn.edu/download/...
 ```
+
+Subsequent runs will use the credentials cached in cookies.txt, if that file exists.
 
 # Known Issues
 
