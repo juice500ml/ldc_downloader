@@ -57,37 +57,25 @@ DOWNLOAD_FILE="corpora.tsv"
 
 
 
-
-################################################################################
-#                                                                              #
-#                       Clean up files from prior runs                         #
-#                                                                              #
-################################################################################
-
-# If an old files exists from a previous run, delete them
-log "Removing previously downloaded files: ${COOKIES_FILE} ${DOWNLOAD_FILE}"
-
-rm -f "${COOKIES_FILE}" "${DOWNLOAD_FILE}"
-
-echo
-
-
-
 ################################################################################
 #                                                                              #
 #                    Prompt user for LDC login credentials                     #
 #                                                                              #
 ################################################################################
 
-log "Enter LDC login credentials"
-echo
-echo
+if [[ ! -f "${COOKIES_FILE}" ]]; then
 
-# Prompt user for login information
-read -p "Enter email address: " EMAIL
-read -s -p "Enter Password: "   PASSWORD
-echo
-echo
+    log "Enter LDC login credentials"
+    echo
+    echo
+
+    # Prompt user for login information
+    read -p "Enter email address: " EMAIL
+    read -s -p "Enter Password: "   PASSWORD
+    echo
+    echo
+
+fi
 
 
 ################################################################################
@@ -207,14 +195,4 @@ for LDC_CORPUS in $@ ; do
 done
 
 echo
-
-
-################################################################################
-#                                                                              #
-#                                  Clean up                                    #
-#                                                                              #
-################################################################################
-
-rm -f ${COOKIES_FILE}
-
 
