@@ -11,6 +11,10 @@
 # Change log:                                                                  #
 #                                                                              #
 #  * 2016-03-05 Lane Schwartz                                                  #
+#    Verify that downloaded files are tgz, not HTML.                           #
+#    If HTML, exit the script, because file was not correctly downloaded       #
+#                                                                              #
+#  * 2016-03-05 Lane Schwartz                                                  #
 #    Download a richer set of information into the corpora.tsv file            #
 #    and record that information in the names of the downloaded files          #
 #                                                                              #
@@ -208,6 +212,16 @@ for LDC_CORPUS in $@ ; do
         echo
     
     fi 
+
+
+    FILE_TYPE=$(file -i -b "${LDC_CORPUS_FILENAME}" | cut -d ';' -f 1)
+
+    if [[ "${FILE_TYPE}" == "text/html" ]]; then
+
+	log "Encountered an error downloading ${LDC_CORPUS}. The downloaded file is HTML, but was expected to be .tgz"
+	exit 1
+
+    fi
 
 done
 
