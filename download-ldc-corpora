@@ -106,7 +106,7 @@ curl ${COOKIE_FLAGS}                                    \
     --data-urlencode "authenticity_token=${TOKEN}"      \
     --data-urlencode "spree_user[login]=${EMAIL}"       \
     --data-urlencode "spree_user[password]=${PASSWORD}" \
-    --data-urlencode "spree_user[remember_me]=0"        \
+    --data-urlencode "spree_user[remember_me]=1"        \
     --data-urlencode "commit=Login"                     \
     "${LOGIN_URL}" &> /dev/null
 
