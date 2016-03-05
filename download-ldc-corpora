@@ -125,13 +125,20 @@ log "Accessing list of your LDC corpora"
 
 
 curl ${COOKIE_FLAGS} "${DOWNLOADS_URL}"     2> /dev/null    | \
-    grep '<td class="">LDC\|button download-counter-button' | \
-    sed "s,\s*<td class=\"\">,,"                            | \
-    sed "s,</td>\s*,,"                                      | \
-    sed "s,.*href=',,"                                      | \
-    sed "s,' title=.*,,"                                    | \
-    tr '\n' '\t'                                            | \
-    sed 's,\s\?\(LDC[0-9A-Z]\+\)\t,\n\1\t,g; s,\t$,,g'        \
+    grep -v "^\s*$"                                         | \
+    sed 's,\s\s*, ,g'                                       | \
+    sed 's,> <,><,g'                                        | \
+    sed 's,^ ,,'                                            | \
+    sed 's,><,>\n<,g'                                       | \
+    tr -d '\n'                                              | \
+    sed 's,.*<tbody>\(.*\)</tbody>.*,\1,'                   | \
+    sed 's,<tr,\n<tr,g'                                     | \
+    sed 's,<tr[^>]*>,,g'                                    | \
+    sed 's,<td[^>]*>,,g'                                    | \
+    sed 's,<span[^>]*>,,g'                                  | \
+    sed "s,<a [^>]* href='\([^']*\)'[^>]*>,\1,g"            | \
+    sed 's,</[^>]*>,\t,g'                                   | \
+    sed 's,\t\t*,\t,g'                                        \
     > ${DOWNLOAD_FILE}                                        \
     2> /dev/null
 
