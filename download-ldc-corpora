@@ -178,7 +178,7 @@ for LDC_CORPUS in $@ ; do
 
     echo
 
-    CORPUS_URL=$(grep "${LDC_CORPUS}" "${DOWNLOAD_FILE}" | cut -f 2)
+    CORPUS_URL=$(grep "${LDC_CORPUS}" "${DOWNLOAD_FILE}" | cut -f 5)
 
     if   [[ "${CORPUS_URL}" =~ ^/download ]]; then
     
